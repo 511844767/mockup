@@ -58,11 +58,14 @@ while updates:
             continue
 
         if '=>' in line:
-            m = re.findall(r'^\t(\S+) => (\S+)(?:\s\([0-9a-fx]+\))?$', line)
+            m = re.findall(r'^\t(\S+) => (.+?)(?:\s\(0x[0-9a-f]+\))?$', line)
             if not m:
                 continue
             name, path = m[0]
             name = os.path.basename(name)
+            if path == 'not found':
+                print(f'WARNING: dependency not found for {name}')
+                continue
         else:
             m = re.findall(r'^\t(/\S+ld-linux[^\s]*)\s*\(0x[0-9a-f]+\)$', line)
             if not m:
@@ -73,9 +76,7 @@ while updates:
             if depends[name] != path:
                 print(f'WARNING: multiple path found for {name}: {depends[name]}, {path}')
             continue
-        if path == 'not found':
-            print(f'WARNING: dependency not found for {name}')
-            continue
+
         depends[name] = path
         print('Found:', name, '=>', path)
         updates.append(path)
